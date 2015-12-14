@@ -28,7 +28,7 @@ import android.widget.TextView;
 public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> {
     private static final String TAG = "CustomAdapter";
 
-    private String[] mDataSet;
+    private MusicFile[] mDataSet;
 
     // BEGIN_INCLUDE(recyclerViewSampleViewHolder)
 
@@ -61,7 +61,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
      *
      * @param dataSet String[] containing the data to populate views to be used by RecyclerView.
      */
-    public CustomAdapter(String[] dataSet) {
+    public CustomAdapter(MusicFile[] dataSet) {
         mDataSet = dataSet;
     }
 

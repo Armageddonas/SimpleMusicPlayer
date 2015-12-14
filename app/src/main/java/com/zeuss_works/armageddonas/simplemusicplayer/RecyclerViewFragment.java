@@ -16,15 +16,22 @@
 
 package com.zeuss_works.armageddonas.simplemusicplayer;
 
+import android.content.res.Resources;
+import android.media.MediaMetadataRetriever;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RadioButton;
+
+import java.io.FileDescriptor;
+import java.lang.reflect.Field;
+import java.util.Arrays;
 
 /**
  * Demonstrates the use of {@link RecyclerView} with a {@link LinearLayoutManager} and a
@@ -35,7 +42,6 @@ public class RecyclerViewFragment extends Fragment {
     private static final String TAG = "RecyclerViewFragment";
     private static final String KEY_LAYOUT_MANAGER = "layoutManager";
     private static final int SPAN_COUNT = 2;
-    private static final int DATASET_COUNT = 10;
 
     private enum LayoutManagerType {
         GRID_LAYOUT_MANAGER,
@@ -50,7 +56,7 @@ public class RecyclerViewFragment extends Fragment {
     protected RecyclerView mRecyclerView;
     protected CustomAdapter mAdapter;
     protected RecyclerView.LayoutManager mLayoutManager;
-    protected String[] mDataset;
+    protected MusicFile[] mDataset;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -63,7 +69,7 @@ public class RecyclerViewFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+                             Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.recycler_view_frag, container, false);
         rootView.setTag(TAG);
 
@@ -136,9 +142,42 @@ public class RecyclerViewFragment extends Fragment {
      * from a local content provider or remote server.
      */
     private void initDataset() {
-        mDataset = new String[DATASET_COUNT];
-        for (int i = 0; i < DATASET_COUNT; i++) {
-            mDataset[i] = "This is element #" + i;
+        mDataset = loadDataset();
+    }
+
+    private MusicFile[] loadDataset() {
+        final String TAG = "loadDatasetFunc";
+
+        Field[] fields = Arrays.copyOfRange(R.raw.class.getFields(), 1, R.raw.class.getFields().length);
+
+        MusicFile rawFiles[] = new MusicFile[fields.length];
+        Log.v(TAG, "size: " + fields.length);
+        for (int count = 0; count < fields.length; count++) {
+            Log.i(TAG, fields[count].getName());
         }
+        for (int count = 0; count < fields.length; count++) {
+            //Log.i("Raw Asset: ", fields[count].getName());
+            try {
+                MusicFile temp = new MusicFile();
+                Log.v(TAG, fields[count].toString());
+                int resourceID = fields[count].getInt(fields[count]);
+
+                //region retrieve metadata
+                MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+                FileDescriptor fd = getResources().openRawResourceFd(resourceID).getFileDescriptor();
+                mmr.setDataSource(fd);
+
+                temp.title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+                Log.v("music", mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
+                temp.duration = Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
+                temp.artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+                //endregion
+                rawFiles[count] = temp;
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+                rawFiles[count] = null;
+            }
+        }
+        return rawFiles;
     }
 }
