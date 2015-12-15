@@ -27,13 +27,15 @@ import android.support.v4.app.FragmentTransaction;
 /**
  * A simple launcher activity containing a summary sample description, sample log and a custom
  * {@link android.support.v4.app.Fragment} which can display a view.
- * <p>
+ * <p/>
  * For devices with displays with a width of 720dp or greater, the sample log is always visible,
  * on other devices it's visibility is controlled by an item on the Action Bar.
  */
 public class MainActivity extends FragmentActivity {
 
     public static final String TAG = "MainActivity";
+
+    private RecyclerViewFragment fragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,10 +44,14 @@ public class MainActivity extends FragmentActivity {
 
         if (savedInstanceState == null) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            RecyclerViewFragment fragment = new RecyclerViewFragment();
+            fragment = new RecyclerViewFragment();
             transaction.replace(R.id.sample_content_fragment, fragment);
             transaction.commit();
         }
+    }
+
+    public RecyclerViewFragment getRecyclerViewFragment() {
+        return fragment;
     }
 
     //todo: remove comments
